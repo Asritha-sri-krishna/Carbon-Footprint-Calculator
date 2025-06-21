@@ -1,4 +1,4 @@
-/ Ensure jsPDF is available globally if using UMD version
+// Ensure jsPDF is available globally if using UMD version
 // Make sure you include the jsPDF library script in your HTML BEFORE this script.
 // Example: <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 const { jsPDF } = window.jspdf;
