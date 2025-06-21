@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Footprint Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- D3.js Library from CDN -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- jsPDF and html2canvas for PDF download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Carbon Footprint Calculator</h1>
+            <p>Your journey to a greener future starts here.</p>
+            <nav>
+                <button class="nav-button active" data-page="welcomePage">Welcome</button>
+                <button class="nav-button" data-page="userGuidePage">User Guide</button>
+                <button class="nav-button" data-page="calculatorPage">Our Calculator</button>
+                <button id="darkModeToggle" title="Toggle Dark Mode">🌙 Toggle Dark Mode</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- 1. Welcome Page -->
+            <section id="welcomePage" class="page active">
+                <h2>Welcome to the Advanced Carbon Footprint Calculator!</h2>
+                <p>Understand and reduce your environmental impact with personalized insights and actionable tips.</p>
+                <p>This tool helps you estimate your annual CO₂ emissions based on your household activities.</p>
+                <button class="action-button" data-navigate="userGuidePage">Get Started</button>
+            </section>
+
+            <!-- 2. User Guide Page -->
+            <section id="userGuidePage" class="page">
+                <h2>How to Use Our Calculator</h2>
+                <div class="guide-content">
+                    <h3>1. Input Your Data:</h3>
+                    <p>On the "Our Calculator" page, you'll find various input fields. Be as accurate as possible for the best results:</p>
+                    <ul>
+                        <li><strong>Monthly Electricity Usage (kWh):</strong> Find this on your utility bill.</li>
+                        <li><strong>Annual Driving Distance (km):</strong> Estimate your yearly car mileage.</li>
+                        <li><strong>Weekly Public Transport (km):</strong> Sum up your bus/train/metro usage per week.</li>
+                        <li><strong>Annual Air Travel (flights):</strong> Count round-trip flights. Short-haul (e.g., within country) and long-haul (e.g., international) have different impacts. For simplicity, we use an average long-haul factor.</li>
+                        <li><strong>Typical Diet Type:</strong> Select the option that best describes your eating habits.</li>
+                        <li><strong>Weekly Waste (kg):</strong> Estimate the weight of your household's non-recyclable trash per week.</li>
+                        <li><strong>Daily Water Usage (liters):</strong> Average daily water consumption for your household.</li>
+                    </ul>
+                    <h3>2. See Your Footprint Live:</h3>
+                    <p>As you enter your data, the calculator will instantly update your total CO₂ emissions and a visual breakdown in the pie chart. No need to click a submit button!</p>
+                    <h3>3. Get Personalized Tips:</h3>
+                    <p>Based on your inputs, you'll receive tailored recommendations on how to reduce your carbon footprint effectively.</p>
+                    <h3>4. Eco Score & Badges:</h3>
+                    <p>See how "green" you are with an Eco Score and a corresponding badge, motivating you on your sustainability journey.</p>
+                    <h3>5. Download Your Report:</h3>
+                    <p>At any time, you can download a detailed PDF report of your results and tips using the "Download Report" button.</p>
+                </div>
+                <button class="action-button" data-navigate="calculatorPage">Go to Calculator</button>
+            </section>
+
+            <!-- 3. Our Calculator Page -->
+            <section id="calculatorPage" class="page">
+                <div class="calculator-grid">
+                    <div class="input-section">
+                        <h2>Your Inputs</h2>
+                        <form id="carbonForm">
+                            <div class="form-group">
+                                <label for="electricity">Monthly Electricity Usage (kWh):</label>
+                                <input type="number" id="electricity" name="electricity" min="0" value="300" placeholder="e.g., 200">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="driving">Annual Driving Distance (km):</label>
+                                <input type="number" id="driving" name="driving" min="0" value="10000" placeholder="e.g., 8000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="publicTransport">Weekly Public Transport (km):</label>
+                                <input type="number" id="publicTransport" name="publicTransport" min="0" value="0" placeholder="e.g., 50">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="airTravel">Annual Air Travel (flights):</label>
+                                <input type="number" id="airTravel" name="airTravel" min="0" value="0" placeholder="e.g., 1 for a round trip">
+                                <small>A single short-haul flight can be ~1 flight, long-haul ~2-3 flights. We use a general long-haul factor.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="diet">Typical Diet Type:</label>
+                                <select id="diet" name="diet">
+                                    <option value="standard">Standard (High Meat)</option>
+                                    <option value="medium_meat">Medium Meat</option>
+                                    <option value="low_meat">Low Meat</option>
+                                    <option value="vegetarian">Vegetarian</option>
+                                    <option value="vegan">Vegan</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="waste">Weekly Waste (kg):</label>
+                                <input type="number" id="waste" name="waste" min="0" value="5" placeholder="e.g., 5">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="water">Daily Water Usage (liters):</label>
+                                <input type="number" id="water" name="water" min="0" value="150" placeholder="e.g., 150">
+                            </div>
+
+                            <!-- No submit button needed as updates are live -->
+                        </form>
+                        <div id="errorMessages" class="error-messages"></div>
+                    </div>
+
+                    <div class="results-section" id="resultsSection">
+                        <h2>Your Annual Carbon Footprint</h2>
+                        <div class="summary">
+                            <p>Total Estimated CO₂ Emissions:</p>
+                            <p class="total-co2" id="totalCo2">0.00 kg CO₂e</p>
+                            <div class="eco-score-area">
+                                <span class="eco-score-label">Eco Score: </span>
+                                <span class="eco-score" id="ecoScore">N/A</span>
+                                <span class="eco-badge" id="ecoBadge"></span>
+                            </div>
+                        </div>
+
+                        <div class="charts-container">
+                            <div class="chart-area">
+                                <h3>Breakdown (Pie Chart)</h3>
+                                <div id="carbonPieChart">
+                                    <!-- D3.js will render the SVG chart here -->
+                                </div>
+                                <p class="pie-interaction-info" id="pieInteractionInfo">Hover over a slice for details!</p>
+                            </div>
+
+                            <div class="chart-area">
+                                <h3>Breakdown (Bar Chart)</h3>
+                                <div id="carbonBarChart">
+                                    <!-- D3.js will render the SVG chart here -->
+                                </div>
+                            </div>
+                        </div>
+                        <p class="chart-note">Charts update live with your inputs.</p>
+
+                        <div class="tips-area">
+                            <h3>Personalized Reduction Tips</h3>
+                            <ul id="tipsList">
+                                <!-- Tips will be dynamically added here -->
+                            </ul>
+                        </div>
+                         <button id="downloadReport" class="action-button download-button" title="Download your carbon footprint report">⬇️ Download Report (PDF)</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Carbon Footprint Calculator. Emission factors are examples and must be researched for accuracy.</p>
+        </footer>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
